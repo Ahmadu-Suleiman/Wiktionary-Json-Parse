@@ -1,4 +1,2 @@
-src/files/kaikki.org-dictionary-English.rar filter=lfs diff=lfs merge=lfs -text
-src/files/WiktionaryDatabase.db filter=lfs diff=lfs merge=lfs -text
 kaikki.org-dictionary-English.rar filter=lfs diff=lfs merge=lfs -text
 WiktionaryDatabase.db filter=lfs diff=lfs merge=lfs -text
