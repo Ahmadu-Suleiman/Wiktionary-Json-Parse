@@ -1,0 +1,3 @@
+CREATE INDEX index_greater_than_L ON entries_greater_than_L(entry_word);
+CREATE INDEX index_less_equal_to_L ON entries_less_equal_to_L(entry_word);
+CREATE INDEX index_entry_word ON entry_words(entry_word);
