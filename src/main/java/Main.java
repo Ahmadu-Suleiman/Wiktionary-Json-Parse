@@ -24,7 +24,7 @@ public class Main {
             while (parser.hasNext()) {
                 JsonElement jsonElement = parser.next();
                 Entry entry = gsonEntry.fromJson(jsonElement, Entry.class);
-                if (entry.getDefinitions().size() > 0) {
+                if (!entry.getDefinitions().isEmpty()) {
                     entries.add(entry);
                 }
             }
