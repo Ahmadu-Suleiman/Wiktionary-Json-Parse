@@ -77,7 +77,7 @@ public class Main {
     }
 
     @SuppressWarnings("unchecked")
-    public static void commenceOperation() {// TODO: 11/2/2023 MAKE SURE TO EXTRACT RAR FILE
+    public static void commenceOperation() {
         String wiktionaryJsonPath = "src/main/resources/kaikki.org-dictionary-English.json";
 
         //obtaining entries
