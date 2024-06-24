@@ -9,10 +9,10 @@ import java.util.ArrayList;
 
 public class WiktionarySqlite {
 
-    private static final String databaseName = null;
+    private static String databaseName = null;
 
     public static void setDatabaseName(String databaseName) {
-        databaseName = databaseName;
+       WiktionarySqlite.databaseName = databaseName;
     }
 
     private static Connection getConnection() throws SQLException {

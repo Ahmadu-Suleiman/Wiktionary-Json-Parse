@@ -9,14 +9,14 @@ import java.util.ArrayList;
 
 public class WiktionaryPostgres {
 
-    private static final String databaseName = null;
-    private static final String user = null;
-    private static final String password = null;
+    private static String databaseName = null;
+    private static String user = null;
+    private static String password = null;
 
     public static void setDatabaseName(String databaseName, String user, String password) {
-        databaseName = databaseName;
-        user = user;
-        password = password;
+        WiktionaryPostgres.databaseName = databaseName;
+        WiktionaryPostgres.user = user;
+        WiktionaryPostgres.password = password;
     }
 
     private static Connection getConnection() throws SQLException {
@@ -38,14 +38,21 @@ public class WiktionaryPostgres {
 
     public static void createTables() {
         String entries = "CREATE TABLE entries (" +
-                "entry_id INTEGER NOT NULL, entry_word TEXT COLLATE NOCASE, " +
-                "entry_plural TEXT, entry_tenses TEXT, entry_compare TEXT, " +
-                "entry_part_of_speech TEXT, entry_definitions TEXT, " +
-                "entry_synonyms TEXT, entry_antonyms TEXT, entry_hypernyms TEXT, " +
-                "entry_hyponyms TEXT, entry_homophones TEXT, PRIMARY KEY(entry_id  AUTOINCREMENT) )";
+                "entry_id SERIAL PRIMARY KEY, " +
+                "entry_word TEXT COLLATE NOCASE, " +
+                "entry_plural TEXT, " +
+                "entry_tenses TEXT, " +
+                "entry_compare TEXT, " +
+                "entry_part_of_speech TEXT, " +
+                "entry_definitions TEXT, " +
+                "entry_synonyms TEXT, " +
+                "entry_antonyms TEXT, " +
+                "entry_hypernyms TEXT, " +
+                "entry_hyponyms TEXT, " +
+                "entry_homophones TEXT)";
 
-        String entry_words = "CREATE TABLE entry_words (entry_id INTEGER NOT NULL, " +
-                "entry_word TEXT COLLATE NOCASE, PRIMARY KEY(entry_id  AUTOINCREMENT) )";
+        String entry_words = "CREATE TABLE entry_words (entry_id SERIAL NOT NULL, " +
+                "entry_word TEXT COLLATE NOCASE, PRIMARY KEY(entry_id))";
 
         try (Connection connection = getConnection();
              Statement statement = connection.createStatement()) {

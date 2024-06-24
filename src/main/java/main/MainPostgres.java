@@ -6,13 +6,13 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonStreamParser;
 import entry.Entry;
 import entry.EntryDeserializer;
-import wiktionary.WiktionarySqlite;
+import wiktionary.WiktionaryPostgres;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-public class MainSqlite {
+public class MainPostgres {
     public static void main(String[] args) {
         System.out.println("========================STARTED========================");
         commenceOperation();
@@ -83,10 +83,11 @@ public class MainSqlite {
         entries = (ArrayList<Entry>) entryList[1];
 
         //transporting entries to database
-        WiktionarySqlite.setDatabaseName("WiktionaryDatabaseCombined.db");
-        WiktionarySqlite.createDatabase();
-        WiktionarySqlite.createTables();
-        WiktionarySqlite.insertIntoTables(entries, entryWords);
-        WiktionarySqlite.createIndices();
+        WiktionaryPostgres.setDatabaseName("WiktionaryDatabase",
+                "postgres","tachyon");
+        WiktionaryPostgres.createDatabase();
+        WiktionaryPostgres.createTables();
+        WiktionaryPostgres.insertIntoTables(entries, entryWords);
+        WiktionaryPostgres.createIndices();
     }
 }
