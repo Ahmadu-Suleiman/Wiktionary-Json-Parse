@@ -9,4 +9,4 @@ from the file.
 
 * Download the rar file from [here](https://drive.google.com/file/d/1lZsyZi97GRjNguHdRuwN30g41MSjlOOo/view?usp=sharing)
 * Place it in the [resources](src/main/resources) folder 
-* Run the classes prefixed with Main- to generate the preferred databases
+* Run the classes in the [main](src/main/java/main) folder to generate the preferred databases

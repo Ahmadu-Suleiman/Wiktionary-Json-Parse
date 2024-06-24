@@ -1,25 +1,27 @@
+package wiktionary;
+
 import com.google.gson.Gson;
+import entry.Entry;
+import main.MainSqliteSeparate;
 
 import java.sql.*;
 import java.util.ArrayList;
 
-public class WiktionarySqlite {
+public class WiktionaryPostgres {
 
-    private static String databaseName = null;
+    private static final String databaseName = null;
+    private static final String user = null;
+    private static final String password = null;
 
-    public static void setDatabaseName(String databaseName) {
-        WiktionarySqlite.databaseName = databaseName;
+    public static void setDatabaseName(String databaseName, String user, String password) {
+        databaseName = databaseName;
+        user = user;
+        password = password;
     }
 
     private static Connection getConnection() throws SQLException {
-        String path = "jdbc:sqlite:src/main/resources/" + databaseName;
-        try {
-            Class.forName("org.sqlite.JDBC");
-        } catch (ClassNotFoundException e) {
-            Main.logger.error(e.toString());
-        }
-
-        return DriverManager.getConnection(path);
+        String url = "jdbc:postgresql://localhost:5432/" + databaseName;
+        return DriverManager.getConnection(url,user,password);
     }
 
     public static void createDatabase() {
@@ -30,19 +32,12 @@ public class WiktionarySqlite {
                 System.out.println("A new database has been created: " + databaseName);
             }
         } catch (SQLException e) {
-            Main.logger.error(e.toString());
+            MainSqliteSeparate.logger.error(e.toString());
         }
     }
 
     public static void createTables() {
-        String entries_greater_than_L = "CREATE TABLE entries_greater_than_L (" +
-                "entry_id INTEGER NOT NULL, entry_word TEXT COLLATE NOCASE, " +
-                "entry_plural TEXT, entry_tenses TEXT, entry_compare TEXT, " +
-                "entry_part_of_speech TEXT, entry_definitions TEXT, " +
-                "entry_synonyms TEXT, entry_antonyms TEXT, entry_hypernyms TEXT, " +
-                "entry_hyponyms TEXT, entry_homophones TEXT, PRIMARY KEY(entry_id  AUTOINCREMENT) )";
-
-        String entries_less_equal_to_L = "CREATE TABLE entries_less_equal_to_L (" +
+        String entries = "CREATE TABLE entries (" +
                 "entry_id INTEGER NOT NULL, entry_word TEXT COLLATE NOCASE, " +
                 "entry_plural TEXT, entry_tenses TEXT, entry_compare TEXT, " +
                 "entry_part_of_speech TEXT, entry_definitions TEXT, " +
@@ -54,29 +49,21 @@ public class WiktionarySqlite {
 
         try (Connection connection = getConnection();
              Statement statement = connection.createStatement()) {
-            statement.execute(entries_greater_than_L);
-            statement.execute(entries_less_equal_to_L);
+            statement.execute(entries);
             statement.execute(entry_words);
 
             System.out.println("Tables created successfully!");
         } catch (SQLException e) {
-            Main.logger.error(e.toString());
+            MainSqliteSeparate.logger.error(e.toString());
         }
     }
 
-    public static void insertIntoTables(ArrayList<Entry> entries_less_equal_to_L,
-                                        ArrayList<Entry> entries_greater_than_L, ArrayList<String> entry_words) {
-        String sql = "INSERT INTO entries_less_equal_to_L(entry_word, entry_plural, entry_tenses, entry_compare," +
+    public static void insertIntoTables(ArrayList<Entry> entries, ArrayList<String> entry_words) {
+        String sql = "INSERT INTO entries(entry_word, entry_plural, entry_tenses, entry_compare," +
                 "entry_part_of_speech, entry_definitions, entry_synonyms, entry_antonyms, entry_hypernyms, " +
                 "entry_hyponyms, entry_homophones) VALUES(?,?,?,?,?,?,?,?,?,?,?)";
 
-        insertEntries(entries_less_equal_to_L, sql);
-
-        sql = "INSERT INTO entries_greater_than_L(entry_word, entry_plural, entry_tenses, entry_compare," +
-                "entry_part_of_speech, entry_definitions, entry_synonyms, entry_antonyms, entry_hypernyms, " +
-                "entry_hyponyms, entry_homophones) VALUES(?,?,?,?,?,?,?,?,?,?,?)";
-
-        insertEntries(entries_greater_than_L, sql);
+        insertEntries(entries, sql);
 
         sql = "INSERT INTO entry_words(entry_word) VALUES(?)";
 
@@ -93,7 +80,7 @@ public class WiktionarySqlite {
             System.out.printf("Inserted %d number of rows%n", result.length);
             connection.commit();
         } catch (SQLException e) {
-            Main.logger.error(e.toString());
+            MainSqliteSeparate.logger.error(e.toString());
         }
     }
 
@@ -135,7 +122,7 @@ public class WiktionarySqlite {
             System.out.printf("Inserted %d number of rows%n", result);
             connection.commit();
         } catch (SQLException e) {
-            Main.logger.error(e.toString());
+            MainSqliteSeparate.logger.error(e.toString());
         }
     }
 
@@ -145,15 +132,12 @@ public class WiktionarySqlite {
             String sql = "CREATE INDEX index_entry_word ON entry_words(entry_word)";
             statement.execute(sql);
 
-            sql = "CREATE INDEX index_greater_than_L ON entries_greater_than_L(entry_word)";
-            statement.execute(sql);
-
-            sql = "CREATE INDEX index_less_equal_to_L ON entries_less_equal_to_L(entry_word)";
+            sql = "CREATE INDEX index_entries ON entries(entry_word)";
             statement.execute(sql);
 
             System.out.println("Indices created successfully!");
         } catch (SQLException e) {
-            Main.logger.error(e.toString());
+            MainSqliteSeparate.logger.error(e.toString());
         }
     }
 }

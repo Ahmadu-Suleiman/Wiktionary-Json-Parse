@@ -1,13 +1,22 @@
+package main;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonStreamParser;
+import entry.Entry;
+import entry.EntryDeserializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import wiktionary.WiktionarySqliteSeparate;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-public class MainCombined {
+public class MainSqliteSeparate {
+    public static final Logger logger = LoggerFactory.getLogger(MainSqliteSeparate.class);
+
     public static void main(String[] args) {
         System.out.println("========================STARTED========================");
         commenceOperation();
@@ -29,7 +38,7 @@ public class MainCombined {
                 }
             }
         } catch (IOException e) {
-            Main.logger.error(e.toString());
+            logger.error(e.toString());
         }
 
         return entries;
@@ -62,9 +71,14 @@ public class MainCombined {
 
         ArrayList<String> entry_words = new ArrayList<>();
         entries.forEach(entry -> entry_words.add(entry.getWord()));
+
+        //dividing entries into two at letter "m"
+        int index_L = entry_words.indexOf("m");
+        ArrayList<Entry> entries_less_equal_to_L = new ArrayList<>(entries.subList(0, index_L));
+        ArrayList<Entry> entries_greater_than_L = new ArrayList<>(entries.subList(index_L, entry_words.size()));
         ArrayList<String> entry_words_distinct = new ArrayList<>(entry_words.stream().distinct().toList());
 
-        return new Object[]{entry_words_distinct, entries};
+        return new Object[]{entry_words_distinct, entries_less_equal_to_L, entries_greater_than_L};
     }
 
     @SuppressWarnings("unchecked")
@@ -75,13 +89,14 @@ public class MainCombined {
         ArrayList<Entry> entries = parseWiktionaryJsonToArray(wiktionaryJsonPath);
         Object[] entryList = getEntryList(entries);
         ArrayList<String> entryWords = (ArrayList<String>) entryList[0];
-        entries = (ArrayList<Entry>) entryList[1];
+        ArrayList<Entry> entries_less_equal_to_L = (ArrayList<Entry>) entryList[1];
+        ArrayList<Entry> entries_greater_than_L = (ArrayList<Entry>) entryList[2];
 
         //transporting entries to database
-        WiktionarySqliteCombined.setDatabaseName("WiktionaryDatabaseCombined.db");
-        WiktionarySqliteCombined.createDatabase();
-        WiktionarySqliteCombined.createTables();
-        WiktionarySqliteCombined.insertIntoTables(entries, entryWords);
-        WiktionarySqliteCombined.createIndices();
+        WiktionarySqliteSeparate.setDatabaseName("WiktionaryDatabase.db");
+        WiktionarySqliteSeparate.createDatabase();
+        WiktionarySqliteSeparate.createTables();
+        WiktionarySqliteSeparate.insertIntoTables(entries_less_equal_to_L, entries_greater_than_L, entryWords);
+        WiktionarySqliteSeparate.createIndices();
     }
 }
