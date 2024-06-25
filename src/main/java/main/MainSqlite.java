@@ -12,6 +12,8 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
+/** This creates an sqlite database of the dictionary
+ */
 public class MainSqlite {
     public static void main(String[] args) {
         System.out.println("========================STARTED========================");

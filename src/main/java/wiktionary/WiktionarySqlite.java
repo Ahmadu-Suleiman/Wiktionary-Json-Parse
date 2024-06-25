@@ -12,7 +12,7 @@ public class WiktionarySqlite {
     private static String databaseName = null;
 
     public static void setDatabaseName(String databaseName) {
-       WiktionarySqlite.databaseName = databaseName;
+        WiktionarySqlite.databaseName = databaseName;
     }
 
     private static Connection getConnection() throws SQLException {
@@ -51,8 +51,8 @@ public class WiktionarySqlite {
 
         try (Connection connection = getConnection();
              Statement statement = connection.createStatement()) {
-            statement.execute(entries);
-            statement.execute(entry_words);
+            statement.executeUpdate(entries);
+            statement.executeUpdate(entry_words);
 
             System.out.println("Tables created successfully!");
         } catch (SQLException e) {

@@ -14,6 +14,8 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
+/** This creates a separated sqlite database of the dictionary
+ */
 public class MainSqliteSeparate {
     public static final Logger logger = LoggerFactory.getLogger(MainSqliteSeparate.class);
 

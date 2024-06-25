@@ -12,6 +12,8 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
+/** This creates a postgres database of the dictionary
+ */
 public class MainPostgres {
     public static void main(String[] args) {
         System.out.println("========================STARTED========================");
@@ -84,8 +86,7 @@ public class MainPostgres {
 
         //transporting entries to database
         WiktionaryPostgres.setDatabaseName("WiktionaryDatabase",
-                "postgres","tachyon");
-        WiktionaryPostgres.createDatabase();
+                "postgres", "tachyon");
         WiktionaryPostgres.createTables();
         WiktionaryPostgres.insertIntoTables(entries, entryWords);
         WiktionaryPostgres.createIndices();

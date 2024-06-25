@@ -58,9 +58,9 @@ public class WiktionarySqliteSeparate {
 
         try (Connection connection = getConnection();
              Statement statement = connection.createStatement()) {
-            statement.execute(entries_greater_than_L);
-            statement.execute(entries_less_equal_to_L);
-            statement.execute(entry_words);
+            statement.executeUpdate(entries_greater_than_L);
+            statement.executeUpdate(entries_less_equal_to_L);
+            statement.executeUpdate(entry_words);
 
             System.out.println("Tables created successfully!");
         } catch (SQLException e) {

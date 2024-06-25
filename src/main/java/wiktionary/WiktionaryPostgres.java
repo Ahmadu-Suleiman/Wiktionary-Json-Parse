@@ -21,25 +21,13 @@ public class WiktionaryPostgres {
 
     private static Connection getConnection() throws SQLException {
         String url = "jdbc:postgresql://localhost:5432/" + databaseName;
-        return DriverManager.getConnection(url,user,password);
-    }
-
-    public static void createDatabase() {
-        try (Connection connection = getConnection()) {
-            if (connection != null) {
-                DatabaseMetaData metaData = connection.getMetaData();
-                System.out.println("The driver name is " + metaData.getDriverName());
-                System.out.println("A new database has been created: " + databaseName);
-            }
-        } catch (SQLException e) {
-            MainSqliteSeparate.logger.error(e.toString());
-        }
+        return DriverManager.getConnection(url, user, password);
     }
 
     public static void createTables() {
-        String entries = "CREATE TABLE entries (" +
+        String entries = "CREATE TABLE IF NOT EXISTS entries (" +
                 "entry_id SERIAL PRIMARY KEY, " +
-                "entry_word TEXT COLLATE NOCASE, " +
+                "entry_word TEXT, " +
                 "entry_plural TEXT, " +
                 "entry_tenses TEXT, " +
                 "entry_compare TEXT, " +
@@ -51,13 +39,13 @@ public class WiktionaryPostgres {
                 "entry_hyponyms TEXT, " +
                 "entry_homophones TEXT)";
 
-        String entry_words = "CREATE TABLE entry_words (entry_id SERIAL NOT NULL, " +
-                "entry_word TEXT COLLATE NOCASE, PRIMARY KEY(entry_id))";
+        String entry_words = "CREATE TABLE IF NOT EXISTS entry_words (entry_id SERIAL NOT NULL, " +
+                "entry_word TEXT, PRIMARY KEY(entry_id))";
 
         try (Connection connection = getConnection();
              Statement statement = connection.createStatement()) {
-            statement.execute(entries);
-            statement.execute(entry_words);
+            statement.executeUpdate(entries);
+            statement.executeUpdate(entry_words);
 
             System.out.println("Tables created successfully!");
         } catch (SQLException e) {
