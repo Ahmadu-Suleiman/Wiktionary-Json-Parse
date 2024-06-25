@@ -1,7 +1,7 @@
 # Wiktionary-Json-Parse
 
 Wiktionary Json Parse is a Java program that parses a large JSON file
-gotten from [kaikki](kaikki.org) containing English dictionary entries into the preferred
+gotten from [kaikki](https://kaikki.org/) containing English dictionary entries into the preferred
 SQL databases, Structuring and removing unneeded attributes
 from the file.
 
