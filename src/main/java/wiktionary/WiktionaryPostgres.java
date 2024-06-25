@@ -37,7 +37,7 @@ public class WiktionaryPostgres {
                 "antonyms TEXT, " +
                 "hypernyms TEXT, " +
                 "hyponyms TEXT, " +
-                "entry_homophones TEXT)";
+                "homophones TEXT)";
 
         String entry_words = "CREATE TABLE IF NOT EXISTS entry_words (id SERIAL NOT NULL, " +
                 "word TEXT, PRIMARY KEY(id))";
