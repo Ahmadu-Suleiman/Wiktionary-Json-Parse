@@ -3,10 +3,7 @@ package entry;
 import com.google.gson.*;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class EntryDeserializer implements JsonDeserializer<Entry> {
 
@@ -197,18 +194,17 @@ public class EntryDeserializer implements JsonDeserializer<Entry> {
             }
         }
 
-        //aggregating attributes
-        StringBuilder tensesBuilder = new StringBuilder();
-        ArrayList<String> tensesList = new ArrayList<>(Arrays.asList(presentSingular, presentParticiple, pastParticiple, past));
-        for (String tense : tensesList) {
-            if (tense != null) {
-                tensesBuilder.append(tense).append(",");
-            }
-        }
-        String tenses = tensesBuilder.isEmpty() ? null : tensesBuilder.deleteCharAt(tensesBuilder.length() - 1).toString();
+        partOfSpeech = getPartOfSpeech(partOfSpeech);
 
-        String compare = comparative != null ?
-                String.format("%s,%s", comparative, superlative) : null;
+        //aggregating attributes
+        ArrayList<String> tenses = new ArrayList<>(Arrays.asList(presentSingular, presentParticiple, pastParticiple, past));
+        tenses.removeIf(Objects::isNull);
+        ArrayList<String> compare = new ArrayList<>(Arrays.asList(word, comparative, superlative));
+        compare.removeIf(Objects::isNull);
+
+        if (compare.size() == 1) {
+            compare = new ArrayList<>();
+        }
 
         //sorting lists
         Collections.sort(synonyms);
@@ -226,5 +222,38 @@ public class EntryDeserializer implements JsonDeserializer<Entry> {
 
         return new Entry(word, partOfSpeech, plural, tenses, compare, definitions,
                 synonyms, antonyms, hypernyms, hyponyms, homophones);
+    }
+
+    public static String getPartOfSpeech(String abbreviation) {
+        return switch (abbreviation) {
+            case "n" -> "Noun";
+            case "prp" -> "Preposition";
+            case "adj" -> "Adjective";
+            case "adv" -> "Adverb";
+            case "prn" -> "Pronoun";
+            case "v" -> "Verb";
+            case "cn" -> "Conjunction";
+            case "int" -> "Interjection";
+            case "pct" -> "Punctuation";
+            case "prt" -> "Particle";
+            case "ar" -> "Article";
+            case "dt" -> "Determiner";
+            case "prv" -> "Proverb";
+            case "sf" -> "Suffix";
+            case "prf" -> "Prefix";
+            case "intf" -> "Interfix";
+            case "inf" -> "Infix";
+            case "sm" -> "Symbol";
+            case "ph" -> "Phrase";
+            case "ab" -> "Abbreviation";
+            case "af" -> "Affix";
+            case "ch" -> "Character";
+            case "cr" -> "Circumfix";
+            case "nm" -> "Name";
+            case "num" -> "Numeral";
+            case "pp" -> "Postposition";
+            case "prpp" -> "Prepositional phrase";
+            default -> abbreviation;
+        };
     }
 }

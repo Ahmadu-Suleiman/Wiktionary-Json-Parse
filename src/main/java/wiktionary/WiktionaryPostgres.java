@@ -81,19 +81,19 @@ public class WiktionaryPostgres {
 
     public static void setEntryStatement(Entry entry, PreparedStatement statement) throws SQLException {
         Gson gson = new Gson();
-        statement.setString(1, entry.getWord());
-        statement.setString(2, entry.getPlural());
-        statement.setString(3, entry.getTenses());
-        statement.setString(4, entry.getCompare());
-        statement.setString(5, entry.getPartOfSpeech());
-        statement.setString(6, gson.toJson(entry.getDefinitions()));
-        statement.setString(7, gson.toJson(entry.getSynonyms()));
-        statement.setString(8, gson.toJson(entry.getAntonyms()));
-        statement.setString(9, gson.toJson(entry.getHypernyms()));
-        statement.setString(10, gson.toJson(entry.getHyponyms()));
-        statement.setString(11, gson.toJson(entry.getHomophones()));
+        statement.setString(1, entry.word());
+        statement.setString(2, entry.plural());
+        statement.setString(3, gson.toJson(entry.tenses()));
+        statement.setString(4, gson.toJson(entry.compare()));
+        statement.setString(5, entry.partOfSpeech());
+        statement.setString(6, gson.toJson(entry.definitions()));
+        statement.setString(7, gson.toJson(entry.synonyms()));
+        statement.setString(8, gson.toJson(entry.antonyms()));
+        statement.setString(9, gson.toJson(entry.hypernyms()));
+        statement.setString(10, gson.toJson(entry.hyponyms()));
+        statement.setString(11, gson.toJson(entry.homophones()));
         statement.addBatch();
-        System.out.println(entry.getWord());
+        System.out.println(entry.word());
     }
 
     public static void insertEntries(ArrayList<Entry> entries, String sql) {

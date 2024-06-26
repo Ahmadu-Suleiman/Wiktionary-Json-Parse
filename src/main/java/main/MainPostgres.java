@@ -31,7 +31,7 @@ public class MainPostgres {
             while (parser.hasNext()) {
                 JsonElement jsonElement = parser.next();
                 Entry entry = gsonEntry.fromJson(jsonElement, Entry.class);
-                if (!entry.getDefinitions().isEmpty()) {
+                if (!entry.definitions().isEmpty()) {
                     entries.add(entry);
                 }
             }
@@ -45,18 +45,18 @@ public class MainPostgres {
     public static Object[] getEntryList(ArrayList<Entry> entries) {
         //sorting entries
         entries.sort((entry1, entry2) -> {
-            String word1 = entry1.getWord();
-            String word2 = entry2.getWord();
+            String word1 = entry1.word();
+            String word2 = entry2.word();
 
             if (word1.equalsIgnoreCase(word2)) {
                 if (word1.toLowerCase().equals(word2)) {
-                    if (entry1.getPartOfSpeech().equals("n")) {
+                    if (entry1.partOfSpeech().equals("noun")) {
                         return -1;
                     } else {
                         return 1;
                     }
                 } else {
-                    if (entry1.getPartOfSpeech().equals("n")) {
+                    if (entry1.partOfSpeech().equals("noun")) {
                         return -1;
                     } else {
                         return 1;
@@ -68,7 +68,7 @@ public class MainPostgres {
         });
 
         ArrayList<String> entry_words = new ArrayList<>();
-        entries.forEach(entry -> entry_words.add(entry.getWord()));
+        entries.forEach(entry -> entry_words.add(entry.word()));
         ArrayList<String> entry_words_distinct = new ArrayList<>(entry_words.stream().distinct().toList());
 
         return new Object[]{entry_words_distinct, entries};
