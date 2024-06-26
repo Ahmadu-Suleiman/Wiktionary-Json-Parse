@@ -85,7 +85,7 @@ public class MainSqlite {
         entries = (ArrayList<Entry>) entryList[1];
 
         //transporting entries to database
-        WiktionarySqlite.setDatabaseName("WiktionaryDatabaseCombined.db");
+        WiktionarySqlite.setDatabaseName("WiktionaryDatabase.db");
         WiktionarySqlite.createDatabase();
         WiktionarySqlite.createTables();
         WiktionarySqlite.insertIntoTables(entries, entryWords);

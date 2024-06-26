@@ -7,7 +7,7 @@ from the file.
 
 ### Important Steps
 
-* Download the rar file from [here](https://drive.google.com/file/d/1lZsyZi97GRjNguHdRuwN30g41MSjlOOo/view?usp=sharing)
+* Download the rar file from [here](https://drive.google.com/file/d/1ZSHok88Dcg5XkqXIazxOrirk-XV9kTAz/view?usp=drive_link)
 * Place it in the [resources](src/main/resources) folder
 * Run the classes in the [main](src/main/java/main) folder to generate the preferred databases
 

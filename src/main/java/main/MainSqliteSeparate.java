@@ -95,7 +95,7 @@ public class MainSqliteSeparate {
         ArrayList<Entry> entries_greater_than_L = (ArrayList<Entry>) entryList[2];
 
         //transporting entries to database
-        WiktionarySqliteSeparate.setDatabaseName("WiktionaryDatabase.db");
+        WiktionarySqliteSeparate.setDatabaseName("WiktionaryDatabaseSeparated.db");
         WiktionarySqliteSeparate.createDatabase();
         WiktionarySqliteSeparate.createTables();
         WiktionarySqliteSeparate.insertIntoTables(entries_less_equal_to_L, entries_greater_than_L, entryWords);
