@@ -10,3 +10,9 @@ from the file.
 * Download the rar file from [here](https://drive.google.com/file/d/1lZsyZi97GRjNguHdRuwN30g41MSjlOOo/view?usp=sharing)
 * Place it in the [resources](src/main/resources) folder
 * Run the classes in the [main](src/main/java/main) folder to generate the preferred databases
+
+### Citations:
+
+Tatu Ylonen: Wiktextract: [Wiktionary as Machine-Readable Structured Data](http://www.lrec-conf.org/proceedings/lrec2022/pdf/2022.lrec-1.140.pdf), Proceedings 
+of the 13th Conference on Language Resources and Evaluation (LREC), pp. 1317-1325, 
+Marseille, 20-25 June 2022.
