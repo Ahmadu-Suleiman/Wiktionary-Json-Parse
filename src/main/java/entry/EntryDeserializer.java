@@ -50,6 +50,7 @@ public class EntryDeserializer implements JsonDeserializer<Entry> {
             default -> jsonObject.get("pos").getAsString();
         };
 
+        String etymology = jsonObject.get("etymology_text") != null ? jsonObject.get("etymology_text").getAsString() : null;
         String plural = null;
         String presentSingular = null;
         String presentParticiple = null;
@@ -111,6 +112,7 @@ public class EntryDeserializer implements JsonDeserializer<Entry> {
         JsonArray senses = jsonObject.getAsJsonArray("senses");
 
         ArrayList<String> definitions = new ArrayList<>();
+        ArrayList<String> examples = new ArrayList<>();
         ArrayList<String> synonyms = new ArrayList<>();
         ArrayList<String> antonyms = new ArrayList<>();
         ArrayList<String> hypernyms = new ArrayList<>();
@@ -120,17 +122,28 @@ public class EntryDeserializer implements JsonDeserializer<Entry> {
         for (JsonElement element : senses) {
             JsonObject senseObject = element.getAsJsonObject();
 
-            //definitions and examples
+            //definitions
             String definition = senseObject.get("raw_glosses") != null ?
                     senseObject.get("raw_glosses").getAsJsonArray().get(0).getAsString() : null;
+            if (definition == null) {
+                definition = senseObject.get("glosses") != null ?
+                        senseObject.get("glosses").getAsJsonArray().get(0).getAsString() : null;
+            }
 
             if (definition != null) {
-
-                String example = senseObject.get("examples") != null ?
-                        senseObject.get("examples").getAsJsonArray().get(0).getAsJsonObject().get("text").getAsString() : null;
-
-                definition = example != null ? String.format("%s\n\te.g. %s", definition, example) : definition;
                 definitions.add(definition);
+            }
+
+            //examples
+            if (senseObject.get("examples") != null) {
+                JsonArray examplesArray = senseObject.get("examples").getAsJsonArray();
+                for (JsonElement elementSense : examplesArray) {
+                    JsonObject examplesObject = elementSense.getAsJsonObject();
+                    String example = examplesObject.get("text").getAsString();
+                    if (example != null) {
+                        examples.add(example);
+                    }
+                }
             }
 
             //synonyms
@@ -220,8 +233,8 @@ public class EntryDeserializer implements JsonDeserializer<Entry> {
         hyponyms = new ArrayList<>(hyponyms.stream().distinct().toList());
         homophones = new ArrayList<>(homophones.stream().distinct().toList());
 
-        return new Entry(word, partOfSpeech, plural, tenses, compare, definitions,
-                synonyms, antonyms, hypernyms, hyponyms, homophones);
+        return new Entry(word, partOfSpeech, etymology, plural, tenses, compare, definitions,
+                examples, synonyms, antonyms, hypernyms, hyponyms, homophones);
     }
 
     public static String getPartOfSpeech(String abbreviation) {

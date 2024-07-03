@@ -11,6 +11,7 @@ import wiktionary.WiktionaryPostgres;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 /** This creates a postgres database of the dictionary
  */
@@ -67,11 +68,8 @@ public class MainPostgres {
             }
         });
 
-        ArrayList<String> entry_words = new ArrayList<>();
-        entries.forEach(entry -> entry_words.add(entry.word()));
-        ArrayList<String> entry_words_distinct = new ArrayList<>(entry_words.stream().distinct().toList());
-
-        return new Object[]{entry_words_distinct, entries};
+        ArrayList<String> entry_words = entries.stream().map(Entry::word).distinct().collect(Collectors.toCollection(ArrayList::new));
+        return new Object[]{entry_words, entries};
     }
 
     @SuppressWarnings("unchecked")

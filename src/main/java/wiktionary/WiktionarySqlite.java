@@ -42,8 +42,8 @@ public class WiktionarySqlite {
         String entries = "CREATE TABLE entries (" +
                 "entry_id INTEGER NOT NULL, entry_word TEXT COLLATE NOCASE, " +
                 "entry_plural TEXT, entry_tenses TEXT, entry_compare TEXT, " +
-                "entry_part_of_speech TEXT, entry_definitions TEXT, " +
-                "entry_synonyms TEXT, entry_antonyms TEXT, entry_hypernyms TEXT, " +
+                "entry_part_of_speech TEXT, entry_etymology TEXT, entry_definitions TEXT, " +
+                "entry_examples TEXT, entry_synonyms TEXT, entry_antonyms TEXT, entry_hypernyms TEXT, " +
                 "entry_hyponyms TEXT, entry_homophones TEXT, PRIMARY KEY(entry_id  AUTOINCREMENT) )";
 
         String entry_words = "CREATE TABLE entry_words (entry_id INTEGER NOT NULL, " +
@@ -61,9 +61,9 @@ public class WiktionarySqlite {
     }
 
     public static void insertIntoTables(ArrayList<Entry> entries, ArrayList<String> entry_words) {
-        String sql = "INSERT INTO entries(entry_word, entry_plural, entry_tenses, entry_compare," +
-                "entry_part_of_speech, entry_definitions, entry_synonyms, entry_antonyms, entry_hypernyms, " +
-                "entry_hyponyms, entry_homophones) VALUES(?,?,?,?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO entries(entry_word, entry_plural, entry_tenses, entry_compare, entry_part_of_speech, " +
+                "entry_etymology, entry_definitions, entry_examples, entry_synonyms, entry_antonyms, entry_hypernyms, " +
+                "entry_hyponyms, entry_homophones) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         insertEntries(entries, sql);
 
@@ -93,12 +93,14 @@ public class WiktionarySqlite {
         statement.setString(3, gson.toJson(entry.tenses()));
         statement.setString(4, gson.toJson(entry.compare()));
         statement.setString(5, entry.partOfSpeech());
-        statement.setString(6, gson.toJson(entry.definitions()));
-        statement.setString(7, gson.toJson(entry.synonyms()));
-        statement.setString(8, gson.toJson(entry.antonyms()));
-        statement.setString(9, gson.toJson(entry.hypernyms()));
-        statement.setString(10, gson.toJson(entry.hyponyms()));
-        statement.setString(11, gson.toJson(entry.homophones()));
+        statement.setString(6, entry.etymology());
+        statement.setString(7, gson.toJson(entry.definitions()));
+        statement.setString(8, gson.toJson(entry.examples()));
+        statement.setString(9, gson.toJson(entry.synonyms()));
+        statement.setString(10, gson.toJson(entry.antonyms()));
+        statement.setString(11, gson.toJson(entry.hypernyms()));
+        statement.setString(12, gson.toJson(entry.hyponyms()));
+        statement.setString(13, gson.toJson(entry.homophones()));
         statement.addBatch();
         System.out.println(entry.word());
     }

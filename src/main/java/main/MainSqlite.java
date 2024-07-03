@@ -11,8 +11,10 @@ import wiktionary.WiktionarySqlite;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
-/** This creates an sqlite database of the dictionary
+/**
+ * This creates an sqlite database of the dictionary
  */
 public class MainSqlite {
     public static void main(String[] args) {
@@ -49,29 +51,22 @@ public class MainSqlite {
             String word2 = entry2.word();
 
             if (word1.equalsIgnoreCase(word2)) {
-                if (word1.toLowerCase().equals(word2)) {
-                    if (entry1.partOfSpeech().equals("noun")) {
+                if (word1.equals(word2)) {
+                    if (entry1.partOfSpeech().equals("Noun")) {
                         return -1;
                     } else {
                         return 1;
                     }
                 } else {
-                    if (entry1.partOfSpeech().equals("noun")) {
-                        return -1;
-                    } else {
-                        return 1;
-                    }
+                    return word2.compareTo(word1);
                 }
             } else {
                 return word1.compareToIgnoreCase(word2);
             }
         });
 
-        ArrayList<String> entry_words = new ArrayList<>();
-        entries.forEach(entry -> entry_words.add(entry.word()));
-        ArrayList<String> entry_words_distinct = new ArrayList<>(entry_words.stream().distinct().toList());
-
-        return new Object[]{entry_words_distinct, entries};
+        ArrayList<String> entry_words = entries.stream().map(Entry::word).distinct().collect(Collectors.toCollection(ArrayList::new));
+        return new Object[]{entry_words, entries};
     }
 
     @SuppressWarnings("unchecked")
