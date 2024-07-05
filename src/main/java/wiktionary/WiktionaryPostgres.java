@@ -56,9 +56,9 @@ public class WiktionaryPostgres {
     }
 
     public static void insertIntoTables(ArrayList<Entry> entries, ArrayList<String> entry_words) {
-        String sql = "INSERT INTO entries(entry_word, entry_plural, entry_tenses, entry_compare, entry_part_of_speech, " +
-                "entry_etymology, entry_definitions, entry_examples, entry_synonyms, entry_antonyms, entry_hypernyms, " +
-                "entry_hyponyms, entry_homophones) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO entries(word, plural, tenses, compare, part_of_speech, " +
+                "etymology, definitions, examples, synonyms, antonyms, hypernyms, " +
+                "hyponyms, homophones) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         insertEntries(entries, sql);
 
