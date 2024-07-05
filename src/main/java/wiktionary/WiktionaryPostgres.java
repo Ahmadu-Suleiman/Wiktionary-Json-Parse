@@ -32,7 +32,9 @@ public class WiktionaryPostgres {
                 "tenses TEXT, " +
                 "compare TEXT, " +
                 "part_of_speech TEXT, " +
+                "etymology TEXT, " +
                 "definitions TEXT, " +
+                "examples TEXT, " +
                 "synonyms TEXT, " +
                 "antonyms TEXT, " +
                 "hypernyms TEXT, " +
@@ -54,13 +56,13 @@ public class WiktionaryPostgres {
     }
 
     public static void insertIntoTables(ArrayList<Entry> entries, ArrayList<String> entry_words) {
-        String sql = "INSERT INTO entries(word, plural, tenses, compare," +
-                "part_of_speech, definitions, synonyms, antonyms, hypernyms, " +
-                "hyponyms, homophones) VALUES(?,?,?,?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO entries(entry_word, entry_plural, entry_tenses, entry_compare, entry_part_of_speech, " +
+                "entry_etymology, entry_definitions, entry_examples, entry_synonyms, entry_antonyms, entry_hypernyms, " +
+                "entry_hyponyms, entry_homophones) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         insertEntries(entries, sql);
 
-        sql = "INSERT INTO entry_words(word) VALUES(?)";
+        sql = "INSERT INTO entry_words(entry_word) VALUES(?)";
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -86,34 +88,26 @@ public class WiktionaryPostgres {
         statement.setString(3, gson.toJson(entry.tenses()));
         statement.setString(4, gson.toJson(entry.compare()));
         statement.setString(5, entry.partOfSpeech());
-        statement.setString(6, gson.toJson(entry.definitions()));
-        statement.setString(7, gson.toJson(entry.synonyms()));
-        statement.setString(8, gson.toJson(entry.antonyms()));
-        statement.setString(9, gson.toJson(entry.hypernyms()));
-        statement.setString(10, gson.toJson(entry.hyponyms()));
-        statement.setString(11, gson.toJson(entry.homophones()));
+        statement.setString(6, entry.etymology());
+        statement.setString(7, gson.toJson(entry.definitions()));
+        statement.setString(8, gson.toJson(entry.examples()));
+        statement.setString(9, gson.toJson(entry.synonyms()));
+        statement.setString(10, gson.toJson(entry.antonyms()));
+        statement.setString(11, gson.toJson(entry.hypernyms()));
+        statement.setString(12, gson.toJson(entry.hyponyms()));
+        statement.setString(13, gson.toJson(entry.homophones()));
         statement.addBatch();
         System.out.println(entry.word());
     }
 
     public static void insertEntries(ArrayList<Entry> entries, String sql) {
-        int middle = Math.floorDiv(entries.size(), 2);
-        ArrayList<Entry> entriesA = new ArrayList<>(entries.subList(0, middle));
-        ArrayList<Entry> entriesB = new ArrayList<>(entries.subList(middle, entries.size()));
-
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             connection.setAutoCommit(false);
-            for (Entry entry : entriesA) {
+            for (Entry entry : entries) {
                 setEntryStatement(entry, statement);
             }
             int result = statement.executeBatch().length;
-
-            for (Entry entry : entriesB) {
-                setEntryStatement(entry, statement);
-            }
-
-            result += statement.executeBatch().length;
             System.out.printf("Inserted %d number of rows%n", result);
             connection.commit();
         } catch (SQLException e) {

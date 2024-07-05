@@ -47,7 +47,7 @@ public class WiktionarySqlite {
                 "entry_hyponyms TEXT, entry_homophones TEXT, PRIMARY KEY(entry_id  AUTOINCREMENT) )";
 
         String entry_words = "CREATE TABLE entry_words (entry_id INTEGER NOT NULL, " +
-                "entry_word TEXT COLLATE NOCASE, PRIMARY KEY(entry_id  AUTOINCREMENT) )";
+                "entry_word TEXT COLLATE NOCASE, PRIMARY KEY(entry_id  AUTOINCREMENT))";
 
         try (Connection connection = getConnection();
              Statement statement = connection.createStatement()) {
@@ -106,23 +106,13 @@ public class WiktionarySqlite {
     }
 
     public static void insertEntries(ArrayList<Entry> entries, String sql) {
-        int middle = Math.floorDiv(entries.size(), 2);
-        ArrayList<Entry> entriesA = new ArrayList<>(entries.subList(0, middle));
-        ArrayList<Entry> entriesB = new ArrayList<>(entries.subList(middle, entries.size()));
-
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             connection.setAutoCommit(false);
-            for (Entry entry : entriesA) {
+            for (Entry entry : entries) {
                 setEntryStatement(entry, statement);
             }
             int result = statement.executeBatch().length;
-
-            for (Entry entry : entriesB) {
-                setEntryStatement(entry, statement);
-            }
-
-            result += statement.executeBatch().length;
             System.out.printf("Inserted %d number of rows%n", result);
             connection.commit();
         } catch (SQLException e) {
