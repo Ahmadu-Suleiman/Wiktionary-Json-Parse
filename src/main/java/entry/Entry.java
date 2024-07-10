@@ -3,9 +3,16 @@ package entry;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public record Entry(String word, String partOfSpeech, String etymology, String plural, ArrayList<String> tenses,
-                    ArrayList<String> compare, ArrayList<String> definitions, ArrayList<String> examples, ArrayList<String> synonyms,
-                    ArrayList<String> antonyms, ArrayList<String> hypernyms, ArrayList<String> hyponyms,
+public record Entry(String word, String partOfSpeech,
+                    String etymology, String plural,
+                    ArrayList<String> tenses,
+                    ArrayList<String> compare,
+                    ArrayList<String> definitions,
+                    ArrayList<String> examples,
+                    ArrayList<String> synonyms,
+                    ArrayList<String> antonyms,
+                    ArrayList<String> hypernyms,
+                    ArrayList<String> hyponyms,
                     ArrayList<String> homophones) {
     @Override
     public boolean equals(Object o) {

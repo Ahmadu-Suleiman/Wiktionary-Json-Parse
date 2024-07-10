@@ -40,14 +40,14 @@ public class WiktionarySqlite {
 
     public static void createTables() {
         String entries = "CREATE TABLE entries (" +
-                "entry_id INTEGER NOT NULL, entry_word TEXT COLLATE NOCASE, " +
-                "entry_plural TEXT, entry_tenses TEXT, entry_compare TEXT, " +
-                "entry_part_of_speech TEXT, entry_etymology TEXT, entry_definitions TEXT, " +
-                "entry_examples TEXT, entry_synonyms TEXT, entry_antonyms TEXT, entry_hypernyms TEXT, " +
-                "entry_hyponyms TEXT, entry_homophones TEXT, PRIMARY KEY(entry_id  AUTOINCREMENT) )";
+                "id INTEGER NOT NULL, word TEXT COLLATE NOCASE, " +
+                "plural TEXT, tenses TEXT, compare TEXT, " +
+                "part_of_speech TEXT, etymology TEXT, definitions TEXT, " +
+                "examples TEXT, synonyms TEXT, antonyms TEXT, hypernyms TEXT, " +
+                "hyponyms TEXT, homophones TEXT, PRIMARY KEY(id  AUTOINCREMENT) )";
 
-        String entry_words = "CREATE TABLE entry_words (entry_id INTEGER NOT NULL, " +
-                "entry_word TEXT COLLATE NOCASE, PRIMARY KEY(entry_id  AUTOINCREMENT))";
+        String entry_words = "CREATE TABLE entry_words (id INTEGER NOT NULL, " +
+                "word TEXT COLLATE NOCASE, PRIMARY KEY(id AUTOINCREMENT))";
 
         try (Connection connection = getConnection();
              Statement statement = connection.createStatement()) {
@@ -61,13 +61,13 @@ public class WiktionarySqlite {
     }
 
     public static void insertIntoTables(ArrayList<Entry> entries, ArrayList<String> entry_words) {
-        String sql = "INSERT INTO entries(entry_word, entry_plural, entry_tenses, entry_compare, entry_part_of_speech, " +
-                "entry_etymology, entry_definitions, entry_examples, entry_synonyms, entry_antonyms, entry_hypernyms, " +
-                "entry_hyponyms, entry_homophones) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO entries(word, plural, tenses, compare, part_of_speech, " +
+                "etymology, definitions, examples, synonyms, antonyms, hypernyms, " +
+                "hyponyms, homophones) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         insertEntries(entries, sql);
 
-        sql = "INSERT INTO entry_words(entry_word) VALUES(?)";
+        sql = "INSERT INTO entry_words(word) VALUES(?)";
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -123,10 +123,10 @@ public class WiktionarySqlite {
     public static void createIndices() {
         try (Connection connection = getConnection();
              Statement statement = connection.createStatement()) {
-            String sql = "CREATE INDEX index_entry_word ON entry_words(entry_word)";
+            String sql = "CREATE INDEX index_entry_word ON entry_words(word)";
             statement.execute(sql);
 
-            sql = "CREATE INDEX index_entries ON entries(entry_word)";
+            sql = "CREATE INDEX index_entries ON entries(word)";
             statement.execute(sql);
 
             System.out.println("Indices created successfully!");
