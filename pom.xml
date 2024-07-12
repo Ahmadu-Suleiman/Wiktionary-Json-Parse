@@ -49,5 +49,11 @@
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.30</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jool-java-8</artifactId>
+            <version>0.9.15</version>
+        </dependency>
     </dependencies>
 </project>

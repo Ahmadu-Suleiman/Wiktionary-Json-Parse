@@ -6,6 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonStreamParser;
 import entry.Entry;
 import entry.EntryDeserializer;
+import org.jooq.lambda.Seq;
 import wiktionary.WiktionarySqlite;
 
 import java.io.*;
@@ -66,6 +67,7 @@ public class MainSqlite {
         });
 
         ArrayList<String> entry_words = entries.stream().map(Entry::word).distinct().collect(Collectors.toCollection(ArrayList::new));
+        entry_words= (ArrayList<String>) Seq.seq(entry_words).distinct(String::toLowerCase).toList();
         return new Object[]{entry_words, entries};
     }
 
