@@ -21,6 +21,10 @@ public class EntryDeserializer implements JsonDeserializer<Entry> {
         JsonObject jsonObject = jsonElement.getAsJsonObject();
 
         String word = jsonObject.get("word").getAsString();
+        word=word.replace("`num`","#");
+        word=word.replace("`gt`",">");
+        word=word.replace("`vert`","|");
+        word=word.replace("`lowbar`","-");
         String partOfSpeech = jsonObject.get("pos").getAsString();
         partOfSpeech = switch (partOfSpeech) {
             case "abbrev" -> "ab";
