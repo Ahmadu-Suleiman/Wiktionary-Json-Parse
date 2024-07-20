@@ -73,7 +73,7 @@ public class MainSqlite {
 
     @SuppressWarnings("unchecked")
     public static void commenceOperation() {
-        String wiktionaryJsonPath = "src/main/resources/kaikki.org-dictionary-English.json";
+        String wiktionaryJsonPath = "src/main/resources/kaikki.org-dictionary-English.jsonl";
 
         //obtaining entries
         ArrayList<Entry> entries = parseWiktionaryJsonToArray(wiktionaryJsonPath);

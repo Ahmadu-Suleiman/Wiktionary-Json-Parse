@@ -1,4 +1,4 @@
-src/main/resources/kaikki.org-dictionary-English.json
+src/main/resources/kaikki.org-dictionary-English.jsonl
 src/main/resources/WiktionaryDatabase.db
 src/main/resources/WiktionaryDatabaseSeperated.db
 target/

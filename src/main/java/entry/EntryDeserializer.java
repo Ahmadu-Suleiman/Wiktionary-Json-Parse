@@ -227,6 +227,8 @@ public class EntryDeserializer implements JsonDeserializer<Entry> {
         Collections.sort(homophones);
 
         //removing duplicates
+        definitions = new ArrayList<>(definitions.stream().distinct().toList());
+        examples = new ArrayList<>(examples.stream().distinct().toList());
         synonyms = new ArrayList<>(synonyms.stream().distinct().toList());
         antonyms = new ArrayList<>(antonyms.stream().distinct().toList());
         hypernyms = new ArrayList<>(hypernyms.stream().distinct().toList());
