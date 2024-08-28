@@ -9,19 +9,34 @@ import java.util.ArrayList;
 
 public class WiktionaryPostgres {
 
-    private static String databaseName = null;
-    private static String user = null;
-    private static String password = null;
+    private static String connectionUri = null;
 
-    public static void setDatabaseName(String databaseName, String user, String password) {
-        WiktionaryPostgres.databaseName = databaseName;
-        WiktionaryPostgres.user = user;
-        WiktionaryPostgres.password = password;
+    public static void setConnectionUri(String connectionUri) {
+        WiktionaryPostgres.connectionUri = connectionUri;
     }
 
     private static Connection getConnection() throws SQLException {
-        String url = "jdbc:postgresql://localhost:5432/" + databaseName;
-        return DriverManager.getConnection(url, user, password);
+        return DriverManager.getConnection(connectionUri);
+    }
+
+    public static void dropExistingTablesAndIndexes() {
+        String dropEntries = "DROP TABLE IF EXISTS entries";
+        String dropEntryWords = "DROP TABLE IF EXISTS entry_words";
+
+        String dropIndexEntries = "DROP INDEX IF EXISTS index_entries";
+        String dropIndexEntryWords = "DROP INDEX IF EXISTS index_entry_word";
+
+        try (Connection connection = getConnection();
+             Statement statement = connection.createStatement()) {
+            statement.execute(dropEntries);
+            statement.execute(dropEntryWords);
+            statement.execute(dropIndexEntries);
+            statement.execute(dropIndexEntryWords);
+
+            System.out.println("Tables and indexes dropped successfully!");
+        } catch (SQLException e) {
+            MainSqliteSeparate.logger.error(e.toString());
+        }
     }
 
     public static void createTables() {
@@ -56,13 +71,13 @@ public class WiktionaryPostgres {
     }
 
     public static void insertIntoTables(ArrayList<Entry> entries, ArrayList<String> entry_words) {
-        String sql = "INSERT INTO entries(word, plural, tenses, compare, part_of_speech, " +
+        String sql = "INSERT INTO entries (word, plural, tenses, compare, part_of_speech, " +
                 "etymology, definitions, examples, synonyms, antonyms, hypernyms, " +
                 "hyponyms, homophones) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         insertEntries(entries, sql);
 
-        sql = "INSERT INTO entry_words(entry_word) VALUES(?)";
+        sql = "INSERT INTO entry_words (entry_word) VALUES(?)";
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -118,10 +133,10 @@ public class WiktionaryPostgres {
     public static void createIndices() {
         try (Connection connection = getConnection();
              Statement statement = connection.createStatement()) {
-            String sql = "CREATE INDEX index_entry_word ON entry_words(word)";
+            String sql = "CREATE INDEX index_entry_word ON entry_words (word)";
             statement.execute(sql);
 
-            sql = "CREATE INDEX index_entries ON entries(word)";
+            sql = "CREATE INDEX index_entries ON entries (word)";
             statement.execute(sql);
 
             System.out.println("Indices created successfully!");

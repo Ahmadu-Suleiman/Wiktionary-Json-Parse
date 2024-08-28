@@ -6,6 +6,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonStreamParser;
 import entry.Entry;
 import entry.EntryDeserializer;
+import io.github.cdimascio.dotenv.Dotenv;
+import org.jooq.lambda.Seq;
 import wiktionary.WiktionaryPostgres;
 
 import java.io.*;
@@ -13,7 +15,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-/** This creates a postgres database of the dictionary
+/**
+ * This creates a postgres database of the dictionary
  */
 public class MainPostgres {
     public static void main(String[] args) {
@@ -50,18 +53,14 @@ public class MainPostgres {
             String word2 = entry2.word();
 
             if (word1.equalsIgnoreCase(word2)) {
-                if (word1.toLowerCase().equals(word2)) {
-                    if (entry1.partOfSpeech().equals("noun")) {
+                if (word1.equals(word2)) {
+                    if (entry1.partOfSpeech().equals("Noun")) {
                         return -1;
                     } else {
                         return 1;
                     }
                 } else {
-                    if (entry1.partOfSpeech().equals("noun")) {
-                        return -1;
-                    } else {
-                        return 1;
-                    }
+                    return word2.compareTo(word1);
                 }
             } else {
                 return word1.compareToIgnoreCase(word2);
@@ -69,12 +68,15 @@ public class MainPostgres {
         });
 
         ArrayList<String> entry_words = entries.stream().map(Entry::word).distinct().collect(Collectors.toCollection(ArrayList::new));
+        entry_words = (ArrayList<String>) Seq.seq(entry_words).distinct(String::toLowerCase).toList();
         return new Object[]{entry_words, entries};
     }
 
     @SuppressWarnings("unchecked")
     public static void commenceOperation() {
-        String wiktionaryJsonPath = "src/main/resources/kaikki.org-dictionary-English.json";
+        Dotenv dotenv = Dotenv.load();
+        String uri = dotenv.get("URI");
+        String wiktionaryJsonPath = "src/main/resources/kaikki.org-dictionary-English.jsonl";
 
         //obtaining entries
         ArrayList<Entry> entries = parseWiktionaryJsonToArray(wiktionaryJsonPath);
@@ -83,8 +85,8 @@ public class MainPostgres {
         entries = (ArrayList<Entry>) entryList[1];
 
         //transporting entries to database
-        WiktionaryPostgres.setDatabaseName("WiktionaryDatabase",
-                "postgres", "tachyon");
+        WiktionaryPostgres.setConnectionUri(uri);
+        WiktionaryPostgres.dropExistingTablesAndIndexes();
         WiktionaryPostgres.createTables();
         WiktionaryPostgres.insertIntoTables(entries, entryWords);
         WiktionaryPostgres.createIndices();
