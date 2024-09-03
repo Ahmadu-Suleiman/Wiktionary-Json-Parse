@@ -38,31 +38,32 @@ public class WiktionaryPostgres {
             MainSqliteSeparate.logger.error(e.toString());
         }
     }
-
     public static void createTables() {
-        String entries = "CREATE TABLE IF NOT EXISTS entries (" +
-                "id SERIAL PRIMARY KEY, " +
-                "word TEXT, " +
-                "plural TEXT, " +
-                "tenses TEXT, " +
-                "compare TEXT, " +
-                "part_of_speech TEXT, " +
-                "etymology TEXT, " +
-                "definitions TEXT, " +
-                "examples TEXT, " +
-                "synonyms TEXT, " +
-                "antonyms TEXT, " +
-                "hypernyms TEXT, " +
-                "hyponyms TEXT, " +
-                "homophones TEXT)";
+        String entries = """
+                CREATE TABLE IF NOT EXISTS entries (
+                    id SERIAL PRIMARY KEY,
+                    word TEXT,
+                    plural TEXT,
+                    tenses TEXT,
+                    compare TEXT,
+                    part_of_speech TEXT,
+                    etymology TEXT,
+                    definitions TEXT,
+                    examples TEXT,
+                    synonyms TEXT,
+                    antonyms TEXT,
+                    hypernyms TEXT,
+                    hyponyms TEXT,
+                    homophones TEXT
+                )""";
 
-        String entry_words = "CREATE TABLE IF NOT EXISTS entry_words (id SERIAL NOT NULL, " +
-                "word TEXT, PRIMARY KEY(id))";
+        String entry_words = """
+                CREATE TABLE IF NOT EXISTS entry_words (id SERIAL PRIMARY KEY, word TEXT)""";
 
         try (Connection connection = getConnection();
              Statement statement = connection.createStatement()) {
-            statement.executeUpdate(entries);
-            statement.executeUpdate(entry_words);
+            statement.execute(entries);
+            statement.execute(entry_words);
 
             System.out.println("Tables created successfully!");
         } catch (SQLException e) {
@@ -77,7 +78,7 @@ public class WiktionaryPostgres {
 
         insertEntries(entries, sql);
 
-        sql = "INSERT INTO entry_words (entry_word) VALUES(?)";
+        sql = "INSERT INTO entry_words (entry) VALUES(?)";
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {

@@ -84,7 +84,7 @@ public class MainPostgres {
         ArrayList<String> entryWords = (ArrayList<String>) entryList[0];
         entries = (ArrayList<Entry>) entryList[1];
 
-        //transporting entries to database
+        //transferring entries to database
         WiktionaryPostgres.setConnectionUri(uri);
         WiktionaryPostgres.dropExistingTablesAndIndexes();
         WiktionaryPostgres.createTables();
