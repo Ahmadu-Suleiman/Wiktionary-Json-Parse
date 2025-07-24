@@ -4,33 +4,21 @@ import argparse
 import sys
 from contextlib import closing
 
-# Mapping of POS abbreviations to full forms
+# Mapping of Wiktextract POS tags to human‑readable names
 POS_MAPPING = {
-    "ab": "abbreviation",
+    "abbr": "abbreviation",
     "adj": "adjective",
     "adv": "adverb",
-    "af": "affix",
-    "ch": "character",
-    "cr": "circumfix",
-    "cn": "conjunction",
-    "dt": "determiner",
-    "inf": "infix",
-    "intf": "interfix",
-    "int": "interjection",
-    "nm": "name",
+    "aux": "auxiliary",
+    "conj": "conjunction",
+    "det": "determiner",
     "num": "numeral",
-    "prt": "particle",
-    "ph": "phrase",
-    "pp": "post position",
-    "prf": "prefix",
-    "prp": "preposition",
-    "prpp": "prepositional phrase",
-    "prn": "pronoun",
-    "prv": "proverb",
-    "pct": "punctuation",
-    "sf": "suffix",
-    "sm": "symbol",
+    "part": "particle",
+    "interj": "interjection",
+    "prep": "preposition",
+    "pron": "pronoun",
 }
+
 
 def create_database_schema(conn):
     print("Creating single-table database schema with separate relation columns...")
@@ -39,7 +27,7 @@ def create_database_schema(conn):
         CREATE TABLE IF NOT EXISTS entries (
             id INTEGER PRIMARY KEY,
             word TEXT NOT NULL,
-            pos TEXT NOT NULL,
+            part_of_speech TEXT NOT NULL,
             etymology TEXT,
             pronunciation_ipa TEXT,
             definitions TEXT,
@@ -51,15 +39,19 @@ def create_database_schema(conn):
             holonyms TEXT,
             meronyms TEXT,
             derived TEXT,
-            related TEXT
+            related TEXT,
+            plural TEXT,
+            comparative TEXT,
+            superlative TEXT
         )
         """)
 
         print("Creating indexes...")
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_word ON entries (word)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS index_entries ON entries (word)")
 
         conn.commit()
         print("Database schema and indexes created successfully.")
+
 
 def process_json_dump(json_dump_path, db_path):
     conn = sqlite3.connect(db_path)
@@ -112,6 +104,7 @@ def process_json_dump(json_dump_path, db_path):
                             if example_text := example.get("text"):
                                 examples_list.append(example_text)
 
+                # Extract relations
                 relation_mapping = {
                     "synonyms": "synonyms",
                     "antonyms": "antonyms",
@@ -136,15 +129,38 @@ def process_json_dump(json_dump_path, db_path):
                         if related_words:
                             relations_data[rel_type] = json.dumps(related_words)
 
+                # Extract forms: plural, comparative, superlative
+                forms_data = word_data.get("forms")
+                plural = comparative = superlative = None
+                if isinstance(forms_data, dict):
+                    plural = forms_data.get("plural")
+                    comparative = forms_data.get("comparative")
+                    superlative = forms_data.get("superlative")
+                elif isinstance(forms_data, list):
+                    for form in forms_data:
+                        if not isinstance(form, dict):
+                            continue
+                        form_text = form.get("form")
+                        tags = form.get("tags") or []
+                        if not form_text or not tags:
+                            continue
+                        if "plural" in tags:
+                            plural = form_text
+                        if "comparative" in tags:
+                            comparative = form_text
+                        if "superlative" in tags:
+                            superlative = form_text
+
                 cursor.execute(
                     """
                     INSERT INTO entries (
-                        word, pos, etymology, pronunciation_ipa,
+                        word, part_of_speech, etymology, pronunciation_ipa,
                         definitions, examples,
                         synonyms, antonyms, hypernyms,
                         hyponyms, holonyms, meronyms,
-                        derived, related
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        derived, related,
+                        plural, comparative, superlative
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         word_str, pos, etymology, pron_ipa,
@@ -153,7 +169,8 @@ def process_json_dump(json_dump_path, db_path):
                         relations_data["synonyms"], relations_data["antonyms"],
                         relations_data["hypernyms"], relations_data["hyponyms"],
                         relations_data["holonyms"], relations_data["meronyms"],
-                        relations_data["derived"], relations_data["related"]
+                        relations_data["derived"], relations_data["related"],
+                        plural, comparative, superlative
                     )
                 )
 
@@ -173,6 +190,7 @@ def process_json_dump(json_dump_path, db_path):
     conn.commit()
     print(f"\nExtraction complete. Total words processed: {word_count}")
     conn.close()
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -195,6 +213,7 @@ def main():
 
     process_json_dump(args.dump_file, args.db_file)
     print(f"\nProcess finished. Database saved to {args.db_file}")
+
 
 if __name__ == "__main__":
     main()
