@@ -24,7 +24,7 @@ POS_MAPPING = {
 def create_database_schema(conn):
     print("Creating database schema...")
     with closing(conn.cursor()) as cursor:
-        # Tenses column stores a simple JSON list of tense forms
+        # Updated schema: combine comparative and superlative into 'compare'
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS entries (
             id INTEGER PRIMARY KEY,
@@ -43,8 +43,7 @@ def create_database_schema(conn):
             derived TEXT,
             related TEXT,
             plural TEXT,
-            comparative TEXT,
-            superlative TEXT,
+            compare TEXT,
             tenses TEXT
         )
         """)
@@ -145,15 +144,17 @@ def process_json_dump(json_dump_path, db_path):
 
                 # Extract forms: plural, comparative, superlative, and verb tenses
                 forms_data = word_data.get("forms")
-                plural = comparative = superlative = None
+                plural = None
+                comp = None
+                sup = None
 
                 # Initialize a list to hold all tense forms as simple strings
                 tenses_list = []
 
                 if isinstance(forms_data, dict):
                     plural = forms_data.get("plural")
-                    comparative = forms_data.get("comparative")
-                    superlative = forms_data.get("superlative")
+                    comp = forms_data.get("comparative")
+                    sup = forms_data.get("superlative")
                 elif isinstance(forms_data, list):
                     for form in forms_data:
                         if not isinstance(form, dict):
@@ -163,20 +164,25 @@ def process_json_dump(json_dump_path, db_path):
                         if not form_text or not tags:
                             continue
 
-                        # Existing form extraction
                         if "plural" in tags:
                             plural = form_text
                         if "comparative" in tags:
-                            comparative = form_text
+                            comp = form_text
                         if "superlative" in tags:
-                            superlative = form_text
+                            sup = form_text
 
-                        # Collect tense forms as simple strings
                         if any(tense_tag in tags for tense_tag in ["third-person", "past-participle", "present-participle", "gerund", "past"]):
-                            if form_text not in tenses_list:  # Avoid duplicates
+                            if form_text not in tenses_list:
                                 tenses_list.append(form_text)
 
-                # Convert the list of tenses to a JSON string if it's not empty
+                # Combine comparative and superlative into one list
+                compare_list = []
+                if comp:
+                    compare_list.append(comp)
+                if sup:
+                    compare_list.append(sup)
+
+                compare_json = json.dumps(compare_list) if compare_list else None
                 tenses_json = json.dumps(tenses_list) if tenses_list else None
 
                 cursor.execute(
@@ -187,9 +193,8 @@ def process_json_dump(json_dump_path, db_path):
                         synonyms, antonyms, hypernyms,
                         hyponyms, holonyms, meronyms,
                         derived, related,
-                        plural, comparative, superlative,
-                        tenses
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        plural, compare, tenses
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         word_str, pos, etymology, pron_ipa,
@@ -199,8 +204,7 @@ def process_json_dump(json_dump_path, db_path):
                         relations_data["hypernyms"], relations_data["hyponyms"],
                         relations_data["holonyms"], relations_data["meronyms"],
                         relations_data["derived"], relations_data["related"],
-                        plural, comparative, superlative,
-                        tenses_json
+                        plural, compare_json, tenses_json
                     )
                 )
 
@@ -231,7 +235,7 @@ def main():
         "dump_file",
         default="kaikki.org-dictionary-English-words.jsonl",
         nargs='?',
-        help="Path to the Wiktionary JSON dump file (default: kaikki.org-dictionary-English-words.jsonl)"
+        help="Path to the Wiktionary JSON dump file (default: kaikk...jsonl)"
     )
     parser.add_argument(
         "db_file",
