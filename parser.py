@@ -21,12 +21,12 @@ POS_MAPPING = {
 
 
 def create_database_schema(conn):
-    print("Creating single-table database schema with separate relation columns...")
+    print("Creating database schema...")
     with closing(conn.cursor()) as cursor:
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS entries (
             id INTEGER PRIMARY KEY,
-            word TEXT NOT NULL,
+            word TEXT NOT NULL COLLATE NOCASE,
             part_of_speech TEXT NOT NULL,
             etymology TEXT,
             pronunciation_ipa TEXT,
@@ -46,8 +46,16 @@ def create_database_schema(conn):
         )
         """)
 
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS entry_words (
+            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            word TEXT COLLATE NOCASE
+        )
+        """)
+
         print("Creating indexes...")
-        cursor.execute("CREATE INDEX IF NOT EXISTS index_entries ON entries (word)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS index_entries_word ON entries (word)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS index_entry_word ON entry_words (word)")
 
         conn.commit()
         print("Database schema and indexes created successfully.")
@@ -81,11 +89,15 @@ def process_json_dump(json_dump_path, db_path):
                 except json.JSONDecodeError:
                     print(f"\nSkipping line due to JSON decoding error: {line.strip()}", file=sys.stderr)
 
-        # Sort entries by word
-        entries.sort(key=lambda x: x[0])
+        # MODIFIED: Sort entries by word, case-insensitively.
+        print("Sorting entries (case-insensitive)...")
+        entries.sort(key=lambda x: x[0].lower())
+        print("Sorting complete.")
 
         for word_str, word_data in entries:
             try:
+                cursor.execute("INSERT OR IGNORE INTO entry_words (word) VALUES (?)", (word_str,))
+
                 pos = POS_MAPPING.get(word_data.get("pos"), word_data.get("pos"))
                 etymology = word_data.get("etymology_text")
                 pron_ipa = None
@@ -194,7 +206,7 @@ def process_json_dump(json_dump_path, db_path):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Process a Wiktionary JSON dump into a single-table SQLite database.",
+        description="Process a Wiktionary JSON dump into a two-table SQLite database.",
         formatter_class=argparse.RawTextHelpFormatter
     )
     parser.add_argument(
