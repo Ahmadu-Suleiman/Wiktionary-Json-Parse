@@ -42,27 +42,26 @@ def create_database_schema(conn):
             pos TEXT NOT NULL, -- Part of Speech
             etymology TEXT,
             pronunciation_ipa TEXT,
-            definitionsTEXT, -- JSON list of strings
-            examplesTEXT,    -- JSON list of strings
-            formsTEXT,       -- JSON list of objects
+            definitions TEXT, -- JSON list of strings
+            examples TEXT,    -- JSON list of strings
+            forms TEXT,       -- JSON list of objects
             -- Dedicated columns for each relation type (simple arrays of words)
-            synonymsTEXT,
-            antonymsTEXT,
-            hypernymsTEXT,
-            hyponymsTEXT,
-            holonymsTEXT,
-            meronymsTEXT,
-            troponymsTEXT,
-            derivedTEXT,
-            relatedTEXT,
-            homophonesTEXT
+            synonyms TEXT,
+            antonyms TEXT,
+            hypernyms TEXT,
+            hyponyms TEXT,
+            holonyms TEXT,
+            meronyms TEXT,
+            troponyms TEXT,
+            derived TEXT,
+            related TEXT,
+            homophones TEXT
         )
         """)
 
         # --- Create Indexes for Performance ---
         print("Creating indexes...")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_word ON entries (word)")
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_pos ON entries (pos)")
 
         conn.commit()
         print("Database schema and indexes created successfully.")
@@ -164,7 +163,7 @@ def process_json_dump(json_dump_path, db_path):
                             synonyms, antonyms, hypernyms,
                             hyponyms, holonyms, meronyms,
                             troponyms, derived, related,
-                            homophones_json
+                            homophones
                         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """,
                         (
