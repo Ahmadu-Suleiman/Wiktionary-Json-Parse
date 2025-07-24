@@ -14,7 +14,7 @@ POS_MAPPING = {
     "det": "determiner",
     "num": "numeral",
     "part": "particle",
-    "interj": "interjection",
+    "intj": "interjection",
     "prep": "preposition",
     "pron": "pronoun",
 }
