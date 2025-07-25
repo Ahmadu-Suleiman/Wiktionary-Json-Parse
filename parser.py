@@ -24,7 +24,7 @@ POS_MAPPING = {
 def create_database_schema(conn):
     print("Creating database schema...")
     with closing(conn.cursor()) as cursor:
-        # Updated schema: combine comparative and superlative into 'compare'
+        # Entries table
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS entries (
             id INTEGER PRIMARY KEY,
@@ -48,19 +48,16 @@ def create_database_schema(conn):
         )
         """)
 
+        # Entry_words table: enforce unique words (case-insensitive)
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS entry_words (
-            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-            word TEXT COLLATE NOCASE
+            id   INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            word TEXT    NOT NULL COLLATE NOCASE UNIQUE
         )
         """)
 
-        print("Creating indexes...")
-        cursor.execute("CREATE INDEX IF NOT EXISTS index_entries_word ON entries (word)")
-        cursor.execute("CREATE INDEX IF NOT EXISTS index_entry_word ON entry_words (word)")
-
         conn.commit()
-        print("Database schema and indexes created successfully.")
+        print("Database schemas created successfully.")
 
 
 def process_json_dump(json_dump_path, db_path):
@@ -97,10 +94,14 @@ def process_json_dump(json_dump_path, db_path):
 
         for word_str, word_data in entries:
             try:
-                cursor.execute("INSERT OR IGNORE INTO entry_words (word) VALUES (?)", (word_str,))
+                cursor.execute(
+                    "INSERT OR IGNORE INTO entry_words (word) VALUES (?)",
+                    (word_str,)
+                )
 
                 pos = POS_MAPPING.get(word_data.get("pos"), word_data.get("pos"))
                 etymology = word_data.get("etymology_text")
+
                 pron_ipa = None
                 if sounds := word_data.get("sounds"):
                     for sound in sounds:
@@ -108,6 +109,7 @@ def process_json_dump(json_dump_path, db_path):
                             pron_ipa = ipa
                             break
 
+                # Definitions and examples
                 definitions_list = []
                 examples_list = []
                 if senses := word_data.get("senses"):
@@ -117,7 +119,7 @@ def process_json_dump(json_dump_path, db_path):
                             if example_text := example.get("text"):
                                 examples_list.append(example_text)
 
-                # Extract relations
+                # Extract relations (always JSON lists)
                 relation_mapping = {
                     "synonyms": "synonyms",
                     "antonyms": "antonyms",
@@ -128,27 +130,22 @@ def process_json_dump(json_dump_path, db_path):
                     "derived": "derived",
                     "related": "related"
                 }
-
                 relations_data = {}
                 for rel_type, json_key in relation_mapping.items():
-                    relations_data[rel_type] = None
+                    related_words = []
                     if relations := word_data.get(json_key):
-                        related_words = []
                         for r in relations:
                             if isinstance(r, dict) and r.get("word"):
                                 related_words.append(r["word"])
                             elif isinstance(r, str):
                                 related_words.append(r)
-                        if related_words:
-                            relations_data[rel_type] = json.dumps(related_words)
+                    relations_data[rel_type] = json.dumps(related_words)
 
-                # Extract forms: plural, comparative, superlative, and verb tenses
+                # Extract forms: plural, comparative, superlative, and tenses
                 forms_data = word_data.get("forms")
                 plural = None
                 comp = None
                 sup = None
-
-                # Initialize a list to hold all tense forms as simple strings
                 tenses_list = []
 
                 if isinstance(forms_data, dict):
@@ -163,27 +160,30 @@ def process_json_dump(json_dump_path, db_path):
                         tags = form.get("tags") or []
                         if not form_text or not tags:
                             continue
-
                         if "plural" in tags:
                             plural = form_text
                         if "comparative" in tags:
                             comp = form_text
                         if "superlative" in tags:
                             sup = form_text
-
-                        if any(tense_tag in tags for tense_tag in ["third-person", "past-participle", "present-participle", "gerund", "past"]):
+                        if any(tense_tag in tags for tense_tag in [
+                            "third-person", "past-participle", "present-participle",
+                            "gerund", "past"]):
                             if form_text not in tenses_list:
                                 tenses_list.append(form_text)
 
-                # Combine comparative and superlative into one list
+                # Combine comparative and superlative
                 compare_list = []
                 if comp:
                     compare_list.append(comp)
                 if sup:
                     compare_list.append(sup)
 
-                compare_json = json.dumps(compare_list) if compare_list else None
-                tenses_json = json.dumps(tenses_list) if tenses_list else None
+                # Always JSON-dump lists (empty or not)
+                definitions_json = json.dumps(definitions_list)
+                examples_json = json.dumps(examples_list)
+                compare_json = json.dumps(compare_list)
+                tenses_json = json.dumps(tenses_list)
 
                 cursor.execute(
                     """
@@ -198,8 +198,7 @@ def process_json_dump(json_dump_path, db_path):
                     """,
                     (
                         word_str, pos, etymology, pron_ipa,
-                        json.dumps(definitions_list) if definitions_list else None,
-                        json.dumps(examples_list) if examples_list else None,
+                        definitions_json, examples_json,
                         relations_data["synonyms"], relations_data["antonyms"],
                         relations_data["hypernyms"], relations_data["hyponyms"],
                         relations_data["holonyms"], relations_data["meronyms"],
